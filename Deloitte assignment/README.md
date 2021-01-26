@@ -1,5 +1,9 @@
 # Data-Visualization
+https://github.com/Algo-RHYTHM/Deloitte_Assignment
 
+Working: The X and Y axis labels can be changed by the corresponding lables given in X and Y axis of the graph and on change of the labels it filters and shows the corresponding values.
+Tool tips are provided which shows the respective appropriate values provided in the CSV file given. On mouse hover it shows x,y values firm attributes, Clusters and Categories provided
+Labels are displayed to differentiate between colors and for representation of particular category.
 
 
 ## Background
