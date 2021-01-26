@@ -10,7 +10,7 @@ function makeResponsive() {
   if (!svgArea.empty()) {
     svgArea.remove();
   }
-  
+
   // Setup Chart Parameters/Dimensions
   var svgWidth = window.innerWidth;
   var svgHeight = window.innerHeight;
@@ -47,7 +47,7 @@ function makeResponsive() {
     // Create Scale Functions for the Chart (chosenXAxis)
     var xLinearScale = d3.scaleLinear()
       .domain([d3.min(acsData, d => d[chosenXAxis]) * 0.8,
-        d3.max(acsData, d => d[chosenXAxis]) * 1.2
+      d3.max(acsData, d => d[chosenXAxis]) * 1.2
       ])
       .range([0, width]);
     return xLinearScale;
@@ -58,7 +58,7 @@ function makeResponsive() {
     // Create Scale Functions for the Chart (chosenYAxis)
     var yLinearScale = d3.scaleLinear()
       .domain([d3.min(acsData, d => d[chosenYAxis]) * 0.8,
-        d3.max(acsData, d => d[chosenYAxis]) * 1.2
+      d3.max(acsData, d => d[chosenYAxis]) * 1.2
       ])
       .range([height, 0]);
     return yLinearScale;
@@ -82,7 +82,7 @@ function makeResponsive() {
     return yAxis;
   }
 
-  
+
 
   // Function for Updating Circles Group with a Transition to New Circles
   function renderCircles(circlesGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) {
@@ -107,30 +107,30 @@ function makeResponsive() {
 
   // Color scale to return different colors for different category
   var color = d3.scaleOrdinal()
-    .domain(["Qualifiers", "Game changers", "Being challenged", "Creating advantage" ])
-    .range([ "#440154ff", "#21908dff", "#fde725ff", "#ff7e7e"])
+    .domain(["Qualifiers", "Game changers", "Being challenged", "Creating advantage"])
+    .range(["#440154ff", "#21908dff", "#fde725ff", "#ff7e7e"])
 
-    // draw legend
-    var legend = svg.selectAll(".legend")
+  // draw legend
+  var legend = svg.selectAll(".legend")
     .data(color.domain())
     .enter().append("g")
     .attr("class", "legend")
-    .attr("transform", function(d, i) { return "translate(10," + (i+0) * 20 + ")"; });
+    .attr("transform", function (d, i) { return "translate(10," + (i + 0) * 20 + ")"; });
 
-    // draw legend colored rectangles
-    legend.append("rect")
+  // draw legend colored rectangles
+  legend.append("rect")
     .attr("x", width - 18)
     .attr("width", 18)
     .attr("height", 18)
     .style("fill", color);
 
-    // draw legend text
-    legend.append("text")
+  // draw legend text
+  legend.append("text")
     .attr("x", width - 24)
     .attr("y", 9)
     .attr("dy", ".35em")
     .style("text-anchor", "end")
-    .text(function(d) { return d;})
+    .text(function (d) { return d; })
 
   // Function for Updating Circles Group with New Tooltip
   function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup, textGroup) {
@@ -188,27 +188,27 @@ function makeResponsive() {
     var toolTip = d3.tip()
       .attr("class", "tooltip d3-tip")
       .offset([90, 90])
-      .html(function(d) {
+      .html(function (d) {
         return (`<strong>${d[chosenVarName]},${d[chosenCategory]},${d[chosenCluster]}</strong><br>${xLabel} ${d[chosenXAxis]}<br>${yLabel} ${d[chosenYAxis]}`);
       });
     // Create Circles Tooltip in the Chart
     circlesGroup.call(toolTip);
     // Create Event Listeners to Display and Hide the Circles Tooltip
-    circlesGroup.on("mouseover", function(data) {
+    circlesGroup.on("mouseover", function (data) {
       toolTip.show(data, this);
     })
       // onmouseout Event
-      .on("mouseout", function(data) {
+      .on("mouseout", function (data) {
         toolTip.hide(data);
       });
     // Create Text Tooltip in the Chart
     textGroup.call(toolTip);
     // Create Event Listeners to Display and Hide the Text Tooltip
-    textGroup.on("mouseover", function(data) {
+    textGroup.on("mouseover", function (data) {
       toolTip.show(data, this);
     })
       // onmouseout Event
-      .on("mouseout", function(data) {
+      .on("mouseout", function (data) {
         toolTip.hide(data);
       });
     return circlesGroup;
@@ -216,399 +216,315 @@ function makeResponsive() {
 
   // Import Data from the data.csv File & Execute Everything Below
   d3.csv("assets/data/data.csv")
-    .then(function(acsData) {
+    .then(function (acsData) {
 
-    // Format/Parse the Data (Cast as Numbers)
-    acsData.forEach(function(data) {
-      data.Auto_Current_Competitiveness = +data.Auto_Current_Competitiveness;
-      data.Consumer_Current_Competitiveness = +data.Consumer_Current_Competitiveness;
-      data.Industry_Current_Competitiveness = +data.Industry_Current_Competitiveness;
-      data.Hitech_Current_Competitiveness = +data.Hitech_Current_Competitiveness;
-      data.Auto_Future_Competitiveness = +data.Auto_Future_Competitiveness;
-      data.Consumer_Future_Competitiveness = +data.Consumer_Future_Competitiveness;
-      data.Industry_Future_Competitiveness = +data.Industry_Future_Competitiveness;
-      data.Hitech_Future_Competitiveness = +data.Hitech_Future_Competitiveness;
-    });
-
-    // Create xLinearScale & yLinearScale Functions for the Chart
-    var xLinearScale = xScale(acsData, chosenXAxis);
-    var yLinearScale = yScale(acsData, chosenYAxis);
-
-    // Create Axis Functions for the Chart
-    var bottomAxis = d3.axisBottom(xLinearScale);
-    var leftAxis = d3.axisLeft(yLinearScale);
-
-    // Append xAxis to the Chart
-    var xAxis = chartGroup.append("g")
-      .classed("x-axis", true)
-      .attr("transform", `translate(0, ${height})`)
-      .call(bottomAxis);
-
-    // Append yAxis to the Chart
-    var yAxis = chartGroup.append("g")
-      .classed("y-axis", true)
-      .call(leftAxis);
-
-    // Create & Append Initial Circles
-    
-    var circlesGroup = chartGroup.selectAll(".stateCircle")
-      .data(acsData)
-      .enter()
-      .append("circle")
-      .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      .attr("cy", d => yLinearScale(d[chosenYAxis]))
-      .attr("class", "stateCircle")
-      .attr("r", 15)
-      .attr("opacity", ".75")
-      .style("fill", function (d) {
-      return color(d.Auto_Category)})
-
-
-      // function update(chosenCategory) {
-      
-      //   // Give these new data to update line
-      //   if(chosenXAxis == "Auto_Current_Competitiveness" && chosenYAxis == "Auto_Future_Competitiveness" ){
-      //     console.log("1111111111111111111111")
-      //     // chosenCategory = Auto_Category;
-      //     console.log(chosenCategory);
-      //   circlesGroup = chartGroup.selectAll(".stateCircle")
-      //   .data(acsData)
-      //   .enter()
-      //   .append("circle")
-      //   .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      //   .attr("cy", d => yLinearScale(d[chosenYAxis]))
-      //   .attr("class", "stateCircle")
-      //   .attr("r", 15)
-      //   .attr("opacity", ".75")
-      //   .style("fill", function (d) {
-      //   return color(d.Auto_Category)})
-      // }
-
-      // else if(chosenXAxis == "Consumer_Current_Competitiveness" && chosenYAxis == "Consumer_Future_Competitiveness" ){
-      //   // chosenCategory = Consumer_Category;
-      //   circlesGroup = chartGroup.selectAll(".stateCircle")
-      //   .data(acsData)
-      //   .enter()
-      //   .append("circle")
-      //   .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      //   .attr("cy", d => yLinearScale(d[chosenYAxis]))
-      //   .attr("class", "stateCircle")
-      //   .attr("r", 15)
-      //   .attr("opacity", ".75")
-      //   .style("fill", function (d) {
-      //   return color(d.Consumer_Category)})
-      // }
-
-      // else if(chosenXAxis == "Industry_Current_Competitiveness" && chosenYAxis == "Industry_Future_Competitiveness" ){
-      //   // chosenCategory = Industrial_Category
-      //   circlesGroup = chartGroup.selectAll(".stateCircle")
-      //   .data(acsData)
-      //   .enter()
-      //   .append("circle")
-      //   .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      //   .attr("cy", d => yLinearScale(d[chosenYAxis]))
-      //   .attr("class", "stateCircle")
-      //   .attr("r", 15)
-      //   .attr("opacity", ".75")
-      //   .style("fill", function (d) {
-      //   return color(d.Industrial_Category)})
-      // }
-
-      // else if(chosenXAxis == "Hitech_Current_Competitiveness" && chosenYAxis == "Hitech_Future_Competitiveness" ){
-      //   // chosenCategory = Hitech_Category
-      //   circlesGroup = chartGroup.selectAll(".stateCircle")
-      //   .data(acsData)
-      //   .enter()
-      //   .append("circle")
-      //   .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      //   .attr("cy", d => yLinearScale(d[chosenYAxis]))
-      //   .attr("class", "stateCircle")
-      //   .attr("r", 15)
-      //   .attr("opacity", ".75")
-      //   .style("fill", function (d) {
-      //   return color(d.Hitech_Category)})
-      // }
-
-      // else{
-      //   circlesGroup = chartGroup.selectAll(".stateCircle")
-      //   .data(acsData)
-      //   .enter()
-      //   .append("circle")
-      //   .attr("cx", d => xLinearScale(d[chosenXAxis]))
-      //   .attr("cy", d => yLinearScale(d[chosenYAxis]))
-      //   .attr("class", "stateCircle")
-      //   .attr("r", 15)
-      //   .attr("opacity", ".75")
-      //   // .style("fill", function (d) {
-      //   // return color(d.Industrial_Category)})
-      // }
-
-
-    // }
-
-      
-  
-    // Append Text to Circles
-    var textGroup = chartGroup.selectAll(".stateText")
-      .data(acsData)
-      .enter()
-      .append("text")
-      .attr("x", d => xLinearScale(d[chosenXAxis]))
-      .attr("y", d => yLinearScale(d[chosenYAxis]*.98))
-      .text(d => (d.abbr))
-      .attr("class", "stateText")
-      .attr("font-size", "12px")
-      .attr("text-anchor", "middle")
-      .attr("fill", "white");
-
-    // Create Group for 4 xAxis Labels
-    var xLabelsGroup = chartGroup.append("g")
-      .attr("transform", `translate(${width / 2}, ${height + 20})`);
-    // Append xAxis
-    var Auto_Current_Competitiveness = xLabelsGroup.append("text")
-      .attr("x", 0)
-      .attr("y", 20)
-      .attr("value", "Auto_Current_Competitiveness") // Value to Grab for Event Listener
-      .attr("chosenCat", "Auto_Category")
-      .classed("active", true)
-      .text("Auto_Current_Competitiveness");
-
-    var Consumer_Current_Competitiveness = xLabelsGroup.append("text")
-      .attr("x", 0)
-      .attr("y", 40)
-      .attr("value", "Consumer_Current_Competitiveness") // Value to Grab for Event Listener
-      .attr("chosenCat", "Consumer_Category")
-      .classed("inactive", true)
-      .text("Consumer_Current_Competitiveness");
-
-    var Industry_Current_Competitiveness = xLabelsGroup.append("text")
-      .attr("x", 0)
-      .attr("y", 60)
-      .attr("value", "Industry_Current_Competitiveness") // Value to Grab for Event Listener
-      .attr("chosenCat", "Industry_Category")
-      .classed("inactive", true)
-      .text("Industry_Current_Competitiveness");
-
-    var Hitech_Current_Competitiveness = xLabelsGroup.append("text")
-      .attr("x", 0)
-      .attr("y", 80)
-      .attr("value", "Hitech_Current_Competitiveness") // Value to Grab for Event Listener
-      .attr("chosenCat", "Hitech_Category")
-      .classed("inactive", true)
-      .text("Hitech_Current_Competitiveness");
-  
-
-    // Create Group for 4 yAxis Labels
-    var yLabelsGroup = chartGroup.append("g")
-      .attr("transform", `translate(-25, ${height / 2})`);
-    // Append yAxis
-    var Auto_Future_Competitiveness = yLabelsGroup.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", -30)
-      .attr("x", 0)
-      .attr("value", "Auto_Future_Competitiveness")
-      .attr("chosenCat", "Auto_Category")
-      .attr("dy", "1em")
-      .classed("axis-text", true)
-      .classed("active", true)
-      .text("Auto_Future_Competitiveness");
-
-    var Consumer_Future_Competitiveness = yLabelsGroup.append("text") 
-      .attr("transform", "rotate(-90)")
-      .attr("y", -50)
-      .attr("x", 0)
-      .attr("value", "Consumer_Future_Competitiveness")
-      .attr("chosenCat", "Consumer_Category")
-      .attr("dy", "1em")
-      .classed("axis-text", true)
-      .classed("inactive", true)
-      .text("Consumer_Future_Competitiveness");
-
-    var Industry_Future_Competitiveness = yLabelsGroup.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", -70)
-      .attr("x", 0)
-      .attr("value", "Industry_Future_Competitiveness")
-      .attr("chosenCat", "Industry_Category")
-      .attr("dy", "1em")
-      .classed("axis-text", true)
-      .classed("inactive", true)
-      .text("Industry_Future_Competitiveness");
-
-    var Hitech_Future_Competitiveness = yLabelsGroup.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", -90)
-      .attr("x", 0)
-      .attr("value", "Hitech_Future_Competitiveness")
-      .attr("chosenCat", "Hitech_Category")
-      .attr("dy", "1em")
-      .classed("axis-text", true)
-      .classed("inactive", true)
-      .text("Hitech_Future_Competitiveness");
-
-    // updateToolTip Function
-    var circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup, textGroup);
-
-    // xAxis Labels Event Listener
-    xLabelsGroup.selectAll("text")
-      .on("click", function() {
-        // Get Value of Selection
-        var value = d3.select(this).attr("value");
-        var chosenCat = d3.select(this).attr("chosenCat")
-        console.log(chosenCat);
-        if (value !== chosenXAxis) {
-          // Replaces chosenXAxis with Value
-          chosenXAxis = value;
-          // Updates xScale for New Data
-          xLinearScale = xScale(acsData, chosenXAxis);
-          // Updates xAxis with Transition
-          xAxis = renderXAxes(xLinearScale, xAxis);
-          // Updates Circles with New Values
-          circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
-          // Updates Text with New Values
-          textGroup = renderText(textGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis)
-          // Updates Tooltips with New Information
-          circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup, textGroup);
-          // Changes Classes to Change Bold Text
-          if (chosenXAxis === "Auto_Current_Competitiveness") {
-            Auto_Current_Competitiveness
-              .classed("active", true)
-              .classed("inactive", false);
-            Consumer_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Industry_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Hitech_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-          }
-          else if (chosenXAxis === "Consumer_Current_Competitiveness") {
-            Auto_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Consumer_Current_Competitiveness
-              .classed("active", true)
-              .classed("inactive", false);
-            Industry_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Hitech_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-          }
-          else if (chosenXAxis === "Industry_Current_Competitiveness") {
-            Auto_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Consumer_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Industry_Current_Competitiveness
-              .classed("active", true)
-              .classed("inactive", false);
-            Hitech_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-          }
-          else {
-            Auto_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Consumer_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Industry_Current_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Hitech_Current_Competitiveness
-              .classed("active", true)
-              .classed("inactive", false);
-          }
-        }
+      // Format/Parse the Data (Cast as Numbers)
+      acsData.forEach(function (data) {
+        data.Auto_Current_Competitiveness = +data.Auto_Current_Competitiveness;
+        data.Consumer_Current_Competitiveness = +data.Consumer_Current_Competitiveness;
+        data.Industry_Current_Competitiveness = +data.Industry_Current_Competitiveness;
+        data.Hitech_Current_Competitiveness = +data.Hitech_Current_Competitiveness;
+        data.Auto_Future_Competitiveness = +data.Auto_Future_Competitiveness;
+        data.Consumer_Future_Competitiveness = +data.Consumer_Future_Competitiveness;
+        data.Industry_Future_Competitiveness = +data.Industry_Future_Competitiveness;
+        data.Hitech_Future_Competitiveness = +data.Hitech_Future_Competitiveness;
       });
-    
+
+      // Create xLinearScale & yLinearScale Functions for the Chart
+      var xLinearScale = xScale(acsData, chosenXAxis);
+      var yLinearScale = yScale(acsData, chosenYAxis);
+
+      // Create Axis Functions for the Chart
+      var bottomAxis = d3.axisBottom(xLinearScale);
+      var leftAxis = d3.axisLeft(yLinearScale);
+
+      // Append xAxis to the Chart
+      var xAxis = chartGroup.append("g")
+        .classed("x-axis", true)
+        .attr("transform", `translate(0, ${height})`)
+        .call(bottomAxis);
+
+      // Append yAxis to the Chart
+      var yAxis = chartGroup.append("g")
+        .classed("y-axis", true)
+        .call(leftAxis);
+
+      // Create & Append Initial Circles
+
+      var circlesGroup = chartGroup.selectAll(".stateCircle")
+        .data(acsData)
+        .enter()
+        .append("circle")
+        .attr("cx", d => xLinearScale(d[chosenXAxis]))
+        .attr("cy", d => yLinearScale(d[chosenYAxis]))
+        .attr("class", "stateCircle")
+        .attr("r", 15)
+        .attr("opacity", ".75")
+        .style("fill", function (d) {
+          return color(d.Auto_Category)
+        })
+
+      // Append Text to Circles
+      var textGroup = chartGroup.selectAll(".stateText")
+        .data(acsData)
+        .enter()
+        .append("text")
+        .attr("x", d => xLinearScale(d[chosenXAxis]))
+        .attr("y", d => yLinearScale(d[chosenYAxis] * .98))
+        .text(d => (d.abbr))
+        .attr("class", "stateText")
+        .attr("font-size", "12px")
+        .attr("text-anchor", "middle")
+        .attr("fill", "white");
+
+      // Create Group for 4 xAxis Labels
+      var xLabelsGroup = chartGroup.append("g")
+        .attr("transform", `translate(${width / 2}, ${height + 20})`);
+      // Append xAxis
+      var Auto_Current_Competitiveness = xLabelsGroup.append("text")
+        .attr("x", 0)
+        .attr("y", 20)
+        .attr("value", "Auto_Current_Competitiveness") // Value to Grab for Event Listener
+        .attr("chosenCat", "Auto_Category")
+        .classed("active", true)
+        .text("Auto_Current_Competitiveness");
+
+      var Consumer_Current_Competitiveness = xLabelsGroup.append("text")
+        .attr("x", 0)
+        .attr("y", 40)
+        .attr("value", "Consumer_Current_Competitiveness") // Value to Grab for Event Listener
+        .attr("chosenCat", "Consumer_Category")
+        .classed("inactive", true)
+        .text("Consumer_Current_Competitiveness");
+
+      var Industry_Current_Competitiveness = xLabelsGroup.append("text")
+        .attr("x", 0)
+        .attr("y", 60)
+        .attr("value", "Industry_Current_Competitiveness") // Value to Grab for Event Listener
+        .attr("chosenCat", "Industry_Category")
+        .classed("inactive", true)
+        .text("Industry_Current_Competitiveness");
+
+      var Hitech_Current_Competitiveness = xLabelsGroup.append("text")
+        .attr("x", 0)
+        .attr("y", 80)
+        .attr("value", "Hitech_Current_Competitiveness") // Value to Grab for Event Listener
+        .attr("chosenCat", "Hitech_Category")
+        .classed("inactive", true)
+        .text("Hitech_Current_Competitiveness");
+
+
+      // Create Group for 4 yAxis Labels
+      var yLabelsGroup = chartGroup.append("g")
+        .attr("transform", `translate(-25, ${height / 2})`);
+      // Append yAxis
+      var Auto_Future_Competitiveness = yLabelsGroup.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -30)
+        .attr("x", 0)
+        .attr("value", "Auto_Future_Competitiveness")
+        .attr("chosenCat", "Auto_Category")
+        .attr("dy", "1em")
+        .classed("axis-text", true)
+        .classed("active", true)
+        .text("Auto_Future_Competitiveness");
+
+      var Consumer_Future_Competitiveness = yLabelsGroup.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -50)
+        .attr("x", 0)
+        .attr("value", "Consumer_Future_Competitiveness")
+        .attr("chosenCat", "Consumer_Category")
+        .attr("dy", "1em")
+        .classed("axis-text", true)
+        .classed("inactive", true)
+        .text("Consumer_Future_Competitiveness");
+
+      var Industry_Future_Competitiveness = yLabelsGroup.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -70)
+        .attr("x", 0)
+        .attr("value", "Industry_Future_Competitiveness")
+        .attr("chosenCat", "Industry_Category")
+        .attr("dy", "1em")
+        .classed("axis-text", true)
+        .classed("inactive", true)
+        .text("Industry_Future_Competitiveness");
+
+      var Hitech_Future_Competitiveness = yLabelsGroup.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -90)
+        .attr("x", 0)
+        .attr("value", "Hitech_Future_Competitiveness")
+        .attr("chosenCat", "Hitech_Category")
+        .attr("dy", "1em")
+        .classed("axis-text", true)
+        .classed("inactive", true)
+        .text("Hitech_Future_Competitiveness");
+
+      // updateToolTip Function
+      var circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup, textGroup);
+
+      // xAxis Labels Event Listener
+      xLabelsGroup.selectAll("text")
+        .on("click", function () {
+          // Get Value of Selection
+          var value = d3.select(this).attr("value");
+          var chosenCat = d3.select(this).attr("chosenCat")
+          console.log(chosenCat);
+          if (value !== chosenXAxis) {
+            // Replaces chosenXAxis with Value
+            chosenXAxis = value;
+            // Updates xScale for New Data
+            xLinearScale = xScale(acsData, chosenXAxis);
+            // Updates xAxis with Transition
+            xAxis = renderXAxes(xLinearScale, xAxis);
+            // Updates Circles with New Values
+            circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
+            // Updates Text with New Values
+            textGroup = renderText(textGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis)
+            // Updates Tooltips with New Information
+            circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup, textGroup);
+            // Changes Classes to Change Bold Text
+            if (chosenXAxis === "Auto_Current_Competitiveness") {
+              Auto_Current_Competitiveness
+                .classed("active", true)
+                .classed("inactive", false);
+              Consumer_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Industry_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Hitech_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+            }
+            else if (chosenXAxis === "Consumer_Current_Competitiveness") {
+              Auto_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Consumer_Current_Competitiveness
+                .classed("active", true)
+                .classed("inactive", false);
+              Industry_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Hitech_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+            }
+            else if (chosenXAxis === "Industry_Current_Competitiveness") {
+              Auto_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Consumer_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Industry_Current_Competitiveness
+                .classed("active", true)
+                .classed("inactive", false);
+              Hitech_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+            }
+            else {
+              Auto_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Consumer_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Industry_Current_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Hitech_Current_Competitiveness
+                .classed("active", true)
+                .classed("inactive", false);
+            }
+          }
+        });
+
       // yAxis Labels Event Listener
-    yLabelsGroup.selectAll("text")
-      .on("click", function() {
-        // Get Value of Selection
-        var value = d3.select(this).attr("value");
-        var chosenCat = d3.select(this).attr("chosenCat")
-        console.log(chosenCat);
-        if (value !== chosenYAxis) {
-          // Replaces chosenYAxis with Value
-          chosenYAxis = value;
-          // Updates yScale for New Data
-          yLinearScale = yScale(acsData, chosenYAxis);
-          // Updates yAxis with Transition
-          yAxis = renderYAxes(yLinearScale, yAxis);
-          // Updates Circles with New Values
-          circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
-          // Updates Text with New Values
-          textGroup = renderText(textGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis)
-          // Updates Tooltips with New Information
-          circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup, textGroup);
-          // Changes Classes to Change Bold Text
-          if (chosenYAxis === "Auto_Future_Competitiveness") {
-            Auto_Future_Competitiveness
-              .classed("active", true)
-              .classed("inactive", false);
-            Consumer_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Industry_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Hitech_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
+      yLabelsGroup.selectAll("text")
+        .on("click", function () {
+          // Get Value of Selection
+          var value = d3.select(this).attr("value");
+          var chosenCat = d3.select(this).attr("chosenCat")
+          console.log(chosenCat);
+          if (value !== chosenYAxis) {
+            // Replaces chosenYAxis with Value
+            chosenYAxis = value;
+            // Updates yScale for New Data
+            yLinearScale = yScale(acsData, chosenYAxis);
+            // Updates yAxis with Transition
+            yAxis = renderYAxes(yLinearScale, yAxis);
+            // Updates Circles with New Values
+            circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
+            // Updates Text with New Values
+            textGroup = renderText(textGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis)
+            // Updates Tooltips with New Information
+            circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup, textGroup);
+            // Changes Classes to Change Bold Text
+            if (chosenYAxis === "Auto_Future_Competitiveness") {
+              Auto_Future_Competitiveness
+                .classed("active", true)
+                .classed("inactive", false);
+              Consumer_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Industry_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Hitech_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+            }
+            else if (chosenYAxis === "Consumer_Future_Competitiveness") {
+              Auto_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Consumer_Future_Competitiveness
+                .classed("active", true)
+                .classed("inactive", false);
+              Industry_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Hitech_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+            }
+            else if (chosenYAxis === "Industry_Future_Competitiveness") {
+              Auto_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Consumer_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Industry_Future_Competitiveness
+                .classed("active", true)
+                .classed("inactive", false);
+              Hitech_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+            }
+            else {
+              Auto_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Consumer_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Industry_Future_Competitiveness
+                .classed("active", false)
+                .classed("inactive", true);
+              Hitech_Future_Competitiveness
+                .classed("active", true)
+                .classed("inactive", false);
+            }
           }
-          else if (chosenYAxis === "Consumer_Future_Competitiveness") {
-            Auto_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Consumer_Future_Competitiveness
-              .classed("active", true)
-              .classed("inactive", false);
-            Industry_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Hitech_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-          }
-          else if (chosenYAxis === "Industry_Future_Competitiveness") {
-            Auto_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Consumer_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Industry_Future_Competitiveness
-              .classed("active", true)
-              .classed("inactive", false);
-            Hitech_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-          }
-          else {
-            Auto_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Consumer_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Industry_Future_Competitiveness
-              .classed("active", false)
-              .classed("inactive", true);
-            Hitech_Future_Competitiveness
-              .classed("active", true)
-              .classed("inactive", false);
-          }
-        }
-      });
-  });
+        });
+    });
 }
 // When Browser Loads, makeResponsive() is Called
 makeResponsive();
